@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Money Compass | Transactions · Categories · Trends</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #f4f7fc;
+            color: #1a2c3e;
+            padding: 24px 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        h1 {
+            font-size: 1.9rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            background: linear-gradient(135deg, #0f2b3d, #1b4a6e);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        .subhead {
+            color: #3a5e7a;
+            font-size: 0.9rem;
+            margin-top: 6px;
+        }
+        .badge-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .pill {
+            background: white;
+            border-radius: 40px;
+            padding: 6px 16px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border: 1px solid #cbdde9;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+        .pill.warning { background: #fff1e6; border-color: #f3c7a8; color: #b45f2b; }
+        .pill.alert { background: #ffe9e9; border-color: #fbc4c4; color: #bc4e5a; }
+        .pill.positive { background: #e2f3e8; border-color: #b8dfcc; color: #1f7840; }
+
+        /* Tab Navigation */
+        .tab-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 28px;
+            border-bottom: 1px solid #dce7ef;
+            padding-bottom: 6px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            background: transparent;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 10px 24px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #4f6f8f;
+            font-family: inherit;
+        }
+        .tab-btn.active {
+            background: #1a4c6e;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.25s ease;
+        }
+        .tab-content.active-tab {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+
+        /* cards & grids */
+        .insight-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 28px;
+            padding: 20px 22px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
+            border: 1px solid #e2edf2;
+            transition: all 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -12px rgba(0, 0, 0, 0.1); }
+        .stat-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            color: #597a9b;
+            margin-bottom: 10px;
+        }
+        .stat-number {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #0c2e42;
+            line-height: 1.2;
+        }
+        .stat-trend {
+            font-size: 0.75rem;
+            margin-top: 10px;
+            color: #4d6a85;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .two-col {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        .full-width {
+            grid-column: span 2;
+        }
+        .card-panel {
+            background: white;
+            border-radius: 28px;
+            border: 1px solid #e2edf2;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        }
+        .card-header {
+            padding: 16px 22px;
+            background: #fafdff;
+            border-bottom: 1px solid #eef3f8;
+            font-weight: 700;
+            font-size: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-body {
+            padding: 20px 22px;
+        }
+        .row-list {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #ecf3f8;
+        }
+        .row-list:last-child { border-bottom: none; }
+        .progress-bg {
+            background: #e5edf2;
+            border-radius: 20px;
+            height: 8px;
+            margin: 12px 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 20px;
+            width: 0%;
+        }
+        .tag {
+            display: inline-block;
+            background: #f0f4f9;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        .tag.critical { background: #ffe3e3; color: #b13e4b; }
+        .tag.advice { background: #e1f0fe; color: #1b6bb0; }
+        .tag.save { background: #e2f3e8; color: #1f7840; }
+        .tx-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+        .tx-table th, .tx-table td {
+            text-align: left;
+            padding: 12px 8px;
+            border-bottom: 1px solid #eef2f7;
+        }
+        .tx-table th {
+            background: #f8fafd;
+            font-weight: 600;
+            color: #2c5a7a;
+        }
+        .debit { color: #c2413c; font-weight: 600; }
+        .credit { color: #2b7a4b; font-weight: 600; }
+        .insight-badge {
+            background: #eef2fa;
+            border-radius: 16px;
+            padding: 12px 16px;
+            margin: 12px 0;
+        }
+        .small-note {
+            font-size: 0.7rem;
+            color: #6183a2;
+            margin-top: 8px;
+        }
+        .footer-note {
+            margin-top: 32px;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #6f8eab;
+            border-top: 1px solid #dae6ef;
+            padding-top: 24px;
+        }
+        @media (max-width: 760px) {
+            .two-col { grid-template-columns: 1fr; }
+            .full-width { grid-column: span 1; }
+        }
+        hr { margin: 16px 0; border: none; border-top: 1px solid #e2edf2; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header-flex">
+        <div>
+            <h1>🧭 Money Compass</h1>
+            <div class="subhead">Personal cashflow review for account ••••7837 · last 30–90 days</div>
+            <div class="badge-group" style="margin-top: 12px;">
+                <span class="pill alert">⚠️ Cashflow tight</span>
+                <span class="pill warning">💰 Low buffer risk</span>
+                <span class="pill">📆 Income pattern: irregular</span>
+            </div>
+        </div>
+        <div class="pill" style="background:#fff7e5;">🗓️ Report: June 2025 snapshot</div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tab-bar">
+        <button class="tab-btn active" data-tab="transactions">Transactions</button>
+        <button class="tab-btn" data-tab="categories">Categories</button>
+        <button class="tab-btn" data-tab="trends">Trends</button>
+    </div>
+
+    <!-- ========================= TAB 1: TRANSACTIONS ========================= -->
+    <div id="tab-transactions" class="tab-content active-tab">
+        <div class="insight-grid">
+            <div class="stat-card">
+                <div class="stat-label">💰 CURRENT AVAILABLE BALANCE</div>
+                <div class="stat-number">$0.68</div>
+                <div class="stat-trend">Ledger balance: $200.50 · pending holds may apply</div>
+                <div class="progress-bg"><div class="progress-fill" style="width: 0.3%; background:#c2413c;"></div></div>
+                <div class="stat-trend">⚠️ Extremely low — immediate risk of overdraft/NSF</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">📉 MONEY IN vs OUT (last 30d)</div>
+                <div class="stat-number">$-20.98</div>
+                <div class="stat-trend">Inflow: $1,147.52 &nbsp;|&nbsp; Outflow: $1,168.50</div>
+                <div class="progress-bg"><div class="progress-fill" style="width: 49%; background:#2b7a4b;"></div><div style="background:#c2413c; width:51%; height:100%; border-radius:20px;"></div></div>
+                <div class="stat-trend">📉 Spending exceeded income — deficit ~$21</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">💸 LOW BALANCE DAYS (est.)</div>
+                <div class="stat-number">29 days</div>
+                <div class="stat-trend">Very low (&lt;$10) on 23 days · risk of surprise fees</div>
+                <div class="tag critical" style="margin-top: 8px;">Potential NSF fees could be avoided with $50 buffer</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">🏦 P2P & CASH APP ACTIVITY</div>
+                <div class="stat-number">$172.17</div>
+                <div class="stat-trend">7 transfers to Lynne / Cash App · avg $24.60</div>
+                <div class="tag advice">Track person-to-person sends for clarity</div>
+            </div>
+        </div>
+
+        <div class="two-col">
+            <div class="card-panel">
+                <div class="card-header">🔁 Recent transactions (last 10)</div>
+                <div class="card-body" style="overflow-x: auto;">
+                    <table class="tx-table">
+                        <thead><tr><th>Date</th><th>Type</th><th>Amount</th><th>Description</th></tr></thead>
+                        <tbody>
+                            <tr><td>2025-06-10</td><td class="debit">DEBIT</td><td class="debit">$25.00</td><td>Cash App Transfer to Lynne De La</td></tr>
+                            <tr><td>2025-06-10</td><td class="debit">DEBIT</td><td class="debit">$37.00</td><td>Cash App Transfer to Lynne De La</td></tr>
+                            <tr><td>2025-06-10</td><td class="debit">DEBIT</td><td class="debit">$35.17</td><td>U-Haul Northridge · moving</td></tr>
+                            <tr><td>2025-06-09</td><td class="debit">DEBIT</td><td class="debit">$25.00</td><td>Cash App Transfer</td></tr>
+                            <tr><td>2025-06-09</td><td class="debit">DEBIT</td><td class="debit">$52.65</td><td>U-Haul Northridge</td></tr>
+                            <tr><td>2025-06-09</td><td class="credit">CREDIT</td><td class="credit">+$200.00</td><td>ACE Cash Express deposit</td></tr>
+                            <tr><td>2025-06-09</td><td class="debit">DEBIT</td><td class="debit">$25.00</td><td>Cash App Transfer</td></tr>
+                            <tr><td>2025-06-06</td><td class="debit">DEBIT</td><td class="debit">$13.00</td><td>Cash App debit purchase</td></tr>
+                            <tr><td>2025-06-05</td><td class="credit">CREDIT</td><td class="credit">+$47.52</td><td>Cash App inbound</td></tr>
+                            <tr><td>2025-06-05</td><td class="debit">DEBIT</td><td class="debit">$50.00</td><td>Zelle to Sam Suerte</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-panel">
+                <div class="card-header">⚠️ Overdraft & fee risk analysis</div>
+                <div class="card-body">
+                    <div class="row-list"><span>📉 Days with balance below $10</span><span class="debit">23 days</span><span>high risk</span></div>
+                    <div class="row-list"><span>💳 Potential NSF exposure</span><span>Multiple debits after low balance</span><span class="tag critical">Action needed</span></div>
+                    <div class="row-list"><span>🏧 ATM / fee pattern</span><span>No ATM fees, but low-balance risk</span></div>
+                    <div class="progress-bg"><div class="progress-fill" style="width: 76%; background:#c2413c;"></div></div>
+                    <div class="insight-badge">✅ <strong>Action plan:</strong> Keep $50 cushion, set low-balance alert at $75 → avoid ~$140 in potential yearly fees.</div>
+                </div>
+            </div>
+        </div>
+        <div class="card-panel full-width">
+            <div class="card-header">📌 Transaction insights & spending rhythm</div>
+            <div class="card-body">
+                <div class="row-list"><span>💸 Cash App sends (7 tx)</span><span>$172.17</span><span class="tag">recurring pattern</span></div>
+                <div class="row-list"><span>🚚 U-Haul expenses (moving related)</span><span>$87.82</span><span class="tag">essential/planned</span></div>
+                <div class="row-list"><span>📈 Income deposits (only 2 in 30d)</span><span>$247.52 total</span><span class="tag critical">irregular income</span></div>
+                <div class="small-note">💡 Most outflows happen right after deposits — try to delay non-urgent sends by 24-48h to keep a safety buffer.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================= TAB 2: CATEGORIES ========================= -->
+    <div id="tab-categories" class="tab-content">
+        <div class="insight-grid">
+            <div class="stat-card"><div class="stat-label">🏷️ TOP SPENDING CATEGORY</div><div class="stat-number">P2P / Cash App</div><div class="stat-trend">$172.17 · 32% of outflows</div></div>
+            <div class="stat-card"><div class="stat-label">🚚 MOVING & TRANSPORT</div><div class="stat-number">$87.82</div><div class="stat-trend">U-Haul · 16% of total spend</div></div>
+            <div class="stat-card"><div class="stat-label">📦 UNCATEGORIZED / OTHER</div><div class="stat-number">$13.00</div><div class="stat-trend">small debit purchase</div></div>
+            <div class="stat-card"><div class="stat-label">🏦 ZELLE / ONE-OFF</div><div class="stat-number">$50.00</div><div class="stat-trend">to Sam Suerte</div></div>
+        </div>
+
+        <div class="two-col">
+            <div class="card-panel">
+                <div class="card-header">📂 Spending categories breakdown</div>
+                <div class="card-body">
+                    <div class="row-list"><span>👥 Person-to-person (Cash App + Zelle)</span><strong>$222.17</strong><span class="tag critical">41% of total outflow</span></div>
+                    <div class="progress-bg"><div class="progress-fill" style="width:41%; background:#e67e22;"></div></div>
+                    <div class="row-list"><span>🚚 Moving / U-Haul</span><strong>$87.82</strong><span class="tag">essential</span></div>
+                    <div class="progress-bg"><div class="progress-fill" style="width:16%; background:#4f9da6;"></div></div>
+                    <div class="row-list"><span>🍽️ Other retail / misc</span><strong>$13.00</strong></div>
+                    <div class="row-list"><span>💰 Income (credits)</span><strong>$247.52</strong><span>inconsistent inflow</span></div>
+                    <div class="insight-badge">💬 <strong>Plain-English takeaway:</strong> Nearly half of your spending goes to peer-to-peer transfers. Reducing just $15/week could flip your deficit into a small surplus.</div>
+                </div>
+            </div>
+            <div class="card-panel">
+                <div class="card-header">🏷️ Tagged spending & optimization</div>
+                <div class="card-body">
+                    <div class="row-list"><span>🔄 Recurring sends (Lynne)</span><span>4 transfers in 5 days</span><span class="tag advice">review necessity</span></div>
+                    <div class="row-list"><span>📦 Moving category</span><span>$87.82 (U-Haul)</span><span class="tag save">planned, but large</span></div>
+                    <div class="row-list"><span>⚠️ Uncategorized spend</span><span>only $13</span><span>low but trackable</span></div>
+                    <hr>
+                    <div class="tag save">✅ Categorization tip: label each Cash App send as “gift”, “shared expense”, or “bill” to see real obligations.</div>
+                </div>
+            </div>
+        </div>
+        <div class="card-panel full-width">
+            <div class="card-header">📌 Actionable category insights</div>
+            <div class="card-body">
+                <div class="row-list"><span>🎯 If you reduce P2P sends by 20% → monthly saving</span><span>$44.43</span><span class="tag save">covers deficit + extra</span></div>
+                <div class="row-list"><span>📦 Moving/U-Haul: already accounted, but plan next rental ahead</span><span>avoid last-minute fees</span></div>
+                <div class="small-note">🔹 Grouping expenses into categories helps see where small changes have biggest impact. P2P is your top lever.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================= TAB 3: TRENDS & PROJECTIONS ========================= -->
+    <div id="tab-trends" class="tab-content">
+        <div class="insight-grid">
+            <div class="stat-card"><div class="stat-label">📉 30-DAY CASHFLOW TREND</div><div class="stat-number">-0.7%</div><div class="stat-trend">spending growth vs income: slight decline</div></div>
+            <div class="stat-card"><div class="stat-label">🔁 P2P SPENDING TREND</div><div class="stat-number">↑ 12%</div><div class="stat-trend">vs previous month estimate (based on velocity)</div></div>
+            <div class="stat-card"><div class="stat-label">💡 PROJECTED BUFFER (next 30d)</div><div class="stat-number">$0–$35</div><div class="stat-trend">if no changes, balance remains critically low</div></div>
+            <div class="stat-card"><div class="stat-label">📊 INCOME VOLATILITY</div><div class="stat-number">High</div><div class="stat-trend">only 2 deposits; unpredictable pattern</div></div>
+        </div>
+
+        <div class="two-col">
+            <div class="card-panel">
+                <div class="card-header">📈 Spending trend analysis</div>
+                <div class="card-body">
+                    <div class="row-list"><span>Cash App sends (weekly avg)</span><span>$43.04/week</span><span class="tag">trending stable</span></div>
+                    <div class="progress-bg"><div class="progress-fill" style="width:68%; background:#f2a65a;"></div></div>
+                    <div class="row-list"><span>Moving expenses (U-Haul)</span><span>2 large debits in 2 days</span><span class="tag">lumpy expense</span></div>
+                    <div class="row-list"><span>Income pattern</span><span>irregular · largest inflow $200</span><span class="tag critical">unreliable timing</span></div>
+                    <div class="insight-badge">📆 Projection: If no changes, next month will likely see repeated low-balance days and potential NSF fees (~$35 each).</div>
+                </div>
+            </div>
+            <div class="card-panel">
+                <div class="card-header">🎯 What-if scenario: small changes</div>
+                <div class="card-body">
+                    <div class="row-list"><span>✅ Reduce P2P sends by $15/week</span><span>→ +$60/month</span><span class="tag save">positive shift</span></div>
+                    <div class="row-list"><span>🛡️ Keep $50 buffer after each deposit</span><span>→ 0 overdraft risk</span><span class="tag save">save ~$140/year</span></div>
+                    <div class="row-list"><span>📅 Consolidate Cash App sends into 1-2 tx/week</span><span>reduces mental load</span></div>
+                    <div class="progress-bg"><div class="progress-fill" style="width:35%; background:#2b7a4b;"></div></div>
+                    <div class="small-note">With just $15 weekly reduction, your balance would stay above $10 most days.</div>
+                </div>
+            </div>
+        </div>
+        <div class="card-panel full-width">
+            <div class="card-header">📅 Trend-based recommendations (forward-looking)</div>
+            <div class="card-body">
+                <div class="row-list"><span>🔁 Recurring P2P pattern detected</span><span>Same recipient (Lynne) → discuss splitting or scheduled transfers</span></div>
+                <div class="row-list"><span>🚚 U-Haul / moving appears isolated but large</span><span>plan next move with a separate savings pocket</span></div>
+                <div class="row-list"><span>📉 Income irregularity</span><span>Build a "baseline budget" based on lowest monthly income (~$200)</span></div>
+                <div class="insight-badge">🌟 <strong>Optimistic forecast:</strong> If you adopt a $40 weekly spending cap on P2P and keep a $30 emergency reserve, you can avoid negative balance entirely within 2 months.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-note">
+        📊 Based on actual posted transactions. Low-balance days are estimated from debits/credits timing (not live balance). This dashboard is for financial awareness — no lending decision.
+    </div>
+</div>
+
+<script>
+    // Tab switching logic
+    const tabs = ['transactions', 'categories', 'trends'];
+    const tabContents = {
+        transactions: document.getElementById('tab-transactions'),
+        categories: document.getElementById('tab-categories'),
+        trends: document.getElementById('tab-trends')
+    };
+    const btns = document.querySelectorAll('.tab-btn');
+
+    function activateTab(tabId) {
+        tabs.forEach(id => {
+            tabContents[id].classList.remove('active-tab');
+        });
+        tabContents[tabId].classList.add('active-tab');
+        btns.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.getAttribute('data-tab') === tabId) {
+                btn.classList.add('active');
+            }
+        });
+    }
+
+    btns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabId = btn.getAttribute('data-tab');
+            if (tabId && tabContents[tabId]) activateTab(tabId);
+        });
+    });
+    // ensure initial active
+    if (!tabContents.transactions.classList.contains('active-tab')) activateTab('transactions');
+</script>
+</body>
+</html>

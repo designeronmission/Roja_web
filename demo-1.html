@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>MoneyLens | Smart Bank Statement Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #f3f6fc;
+            color: #13294b;
+            padding: 24px 20px;
+            line-height: 1.45;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        h1 {
+            font-size: 1.9rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            background: linear-gradient(135deg, #0b2b44, #1c5980);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        .sub {
+            color: #2c6079;
+            font-size: 0.85rem;
+            margin-top: 6px;
+        }
+        .pill-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .pill {
+            background: white;
+            border-radius: 100px;
+            padding: 6px 16px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid #cfe0ed;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+        .pill.warning { background: #fff0e5; border-color: #ffd8bc; color: #b85c1a; }
+        .pill.alert { background: #ffe8e8; border-color: #fbc2c2; color: #bc4e5a; }
+        .pill.success { background: #e2f3e8; border-color: #b8dfcc; color: #1f7840; }
+
+        /* tab navigation */
+        .tab-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 28px;
+            border-bottom: 1px solid #dce7ef;
+            padding-bottom: 6px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            background: transparent;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 10px 24px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #4a6f8f;
+            font-family: inherit;
+        }
+        .tab-btn.active {
+            background: #1b5a7a;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.25s ease;
+        }
+        .tab-content.active-tab {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+
+        /* cards & grids */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 28px;
+            padding: 20px 22px;
+            border: 1px solid #e1edf5;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            transition: all 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -12px rgba(0, 0, 0, 0.1); }
+        .stat-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            color: #5e7e9c;
+            margin-bottom: 12px;
+        }
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #0f3a54;
+            line-height: 1.2;
+        }
+        .stat-trend {
+            font-size: 0.75rem;
+            margin-top: 10px;
+            color: #55738e;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .progress-bg {
+            background: #e2ecf3;
+            border-radius: 20px;
+            height: 6px;
+            margin: 12px 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 20px;
+            width: 0%;
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        .full-width {
+            grid-column: span 2;
+        }
+        .card-panel {
+            background: white;
+            border-radius: 28px;
+            border: 1px solid #e1edf5;
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+        .card-header {
+            padding: 16px 22px;
+            background: #fbfefe;
+            border-bottom: 1px solid #eaf1f7;
+            font-weight: 700;
+            font-size: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-body {
+            padding: 20px 22px;
+        }
+        .row-list {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #ecf3f9;
+        }
+        .row-list:last-child { border-bottom: none; }
+        .tag {
+            display: inline-block;
+            background: #eef3fa;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        .tag.critical { background: #ffe6e6; color: #b13e4b; }
+        .tag.advice { background: #e4f0fe; color: #1b6bb0; }
+        .tag.save { background: #e0f2e8; color: #1f7840; }
+
+        .tx-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+        .tx-table th, .tx-table td {
+            text-align: left;
+            padding: 10px 8px;
+            border-bottom: 1px solid #ecf3f9;
+        }
+        .tx-table th {
+            background: #f8fbfe;
+            font-weight: 600;
+            color: #2c5e7e;
+        }
+        .debit { color: #cd5c5c; font-weight: 600; }
+        .credit { color: #2b7a4b; font-weight: 600; }
+
+        @media (max-width: 760px) {
+            .two-col { grid-template-columns: 1fr; }
+            .full-width { grid-column: span 1; }
+        }
+        hr { margin: 16px 0; border: none; border-top: 1px solid #e2edf5; }
+        .insight-badge {
+            background: #f0f6fb;
+            border-radius: 18px;
+            padding: 12px 16px;
+            margin: 12px 0;
+        }
+        .small-note {
+            font-size: 0.7rem;
+            color: #6d8dab;
+            margin-top: 8px;
+        }
+        .footer-note {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #7e9ab3;
+            border-top: 1px solid #dce7ef;
+            padding-top: 24px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div>
+            <h1>🧾 MoneyLens Dashboard</h1>
+            <div class="sub">Bank statement analysis · Action Gypsum payroll · last 90 days</div>
+            <div class="pill-group" style="margin-top: 12px;">
+                <span class="pill alert">⚠️ Cashflow tight</span>
+                <span class="pill warning">💰 Frequent low balance</span>
+                <span class="pill success">📆 Paycheck: Action Gypsum</span>
+            </div>
+        </div>
+        <div class="pill" style="background:#fff5e8;">📅 Report: Sep 2022 snapshot</div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tab-bar">
+        <button class="tab-btn active" data-tab="transactions">📋 Transactions</button>
+        <button class="tab-btn" data-tab="categories">🏷️ Categories</button>
+        <button class="tab-btn" data-tab="trends">📈 Trends</button>
+    </div>
+
+    <!-- ================= TAB 1: TRANSACTIONS ================= -->
+    <div id="tab-transactions" class="tab-content active-tab">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">💰 TOTAL INFLOW (last 90d)</div>
+                <div class="stat-number">$6,254.41</div>
+                <div class="stat-trend">Paychecks + reimbursements</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">📉 TOTAL OUTFLOW (last 90d)</div>
+                <div class="stat-number">$6,819.32</div>
+                <div class="stat-trend">Net cashflow: <span class="debit">- $564.91</span></div>
+                <div class="progress-bg"><div class="progress-fill" style="width: 48%; background:#2b7a4b;"></div><div style="background:#cd5c5c; width:52%; height:100%; border-radius:20px;"></div></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">🏦 OVERDRAFT / LATE FEES</div>
+                <div class="stat-number">$102</div>
+                <div class="stat-trend">Late fee $39 + Interest $21.71 + Maintenance $28</div>
+                <div class="tag critical">~$102 avoidable in 90 days</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">⚡ HIGH-RISK DAYS</div>
+                <div class="stat-number">22 days</div>
+                <div class="stat-trend">Balance estimated &lt;$20 after large debits</div>
+            </div>
+        </div>
+
+        <div class="two-col">
+            <div class="card-panel">
+                <div class="card-header">🔁 Recent transactions (sample: last 15)</div>
+                <div class="card-body" style="overflow-x: auto;">
+                    <table class="tx-table">
+                        <thead><tr><th>Date</th><th>Type</th><th>Amount</th><th>Description</th></tr></thead>
+                        <tbody>
+                            <tr><td>2022-09-16</td><td class="debit">DEBIT</td><td class="debit">$11.40</td><td>Interest Charge · Finance fee</td></tr>
+                            <tr><td>2022-09-16</td><td class="credit">CREDIT</td><td class="credit">$40.00</td><td>Online payment from check</td></tr>
+                            <tr><td>2022-09-16</td><td class="debit">DEBIT</td><td class="debit">$50.99</td><td>Brigit Protection</td></tr>
+                            <tr><td>2022-09-16</td><td class="debit">DEBIT</td><td class="debit">$20.64</td><td>Amazon shopping</td></tr>
+                            <tr><td>2022-09-16</td><td class="credit">CREDIT</td><td class="credit">$738.39</td><td>Action Gypsum PAYCHECK</td></tr>
+                            <tr><td>2022-09-13</td><td class="debit">DEBIT</td><td class="debit">$38.10</td><td>Chevron gas</td></tr>
+                            <tr><td>2022-09-13</td><td class="debit">DEBIT</td><td class="debit">$51.12</td><td>Black Angus dining</td></tr>
+                            <tr><td>2022-09-12</td><td class="debit">DEBIT</td><td class="debit">$139.00</td><td>Hotels.com</td></tr>
+                            <tr><td>2022-09-12</td><td class="debit">DEBIT</td><td class="debit">$71.00</td><td>Natural Nails & Spa</td></tr>
+                            <tr><td>2022-09-12</td><td class="debit">DEBIT</td><td class="debit">$151.06</td><td>Kemper Auto insurance</td></tr>
+                            <tr><td>2022-09-12</td><td class="debit">DEBIT</td><td class="debit">$300.00</td><td>Cashback Loans</td></tr>
+                            <tr><td>2022-09-09</td><td class="credit">CREDIT</td><td class="credit">$740.21</td><td>Action Gypsum PAYCHECK</td></tr>
+                            <tr><td>2022-09-07</td><td class="debit">DEBIT</td><td class="debit">$172.22</td><td>Toyota auto payment</td></tr>
+                            <tr><td>2022-09-07</td><td class="debit">DEBIT</td><td class="debit">$129.48</td><td>OneMain Financial loan</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="small-note">🔹 Frequent large debits: Cashback Loans, auto, insurance → rapid balance drops after paycheck.</div>
+                </div>
+            </div>
+            <div class="card-panel">
+                <div class="card-header">⚠️ Fee & overdraft analysis</div>
+                <div class="card-body">
+                    <div class="row-list"><span>💰 Late fee (Credit card)</span><span>$39.00</span><span class="tag critical">avoidable</span></div>
+                    <div class="row-list"><span>📉 Interest charges (2x)</span><span>$21.71</span><span class="tag advice">carry balance</span></div>
+                    <div class="row-list"><span>🏦 Monthly maintenance fees</span><span>$28.00</span><span>waiver possible</span></div>
+                    <div class="row-list"><span>💸 Potential NSF risk</span><span>Multiple low-balance days</span><span class="tag critical">action needed</span></div>
+                    <div class="insight-badge">✅ <strong>Action:</strong> Keep $75 buffer after each paycheck to avoid $35+ NSF/late fees.</div>
+                </div>
+            </div>
+        </div>
+        <div class="card-panel full-width">
+            <div class="card-header">📌 Transaction insights</div>
+            <div class="card-body">
+                <div class="row-list"><span>💵 Paycheck pattern</span><span>Action Gypsum: ~$658–$740 (bi-weekly)</span><span class="tag success">stable income</span></div>
+                <div class="row-list"><span>🏦 Loan repayments (OneMain + LendingPoint)</span><span>$129.48 + $101.70</span><span class="tag advice">fixed obligations</span></div>
+                <div class="row-list"><span>🚗 Auto payment (Toyota)</span><span>$172–$355 / month</span><span>large recurring</span></div>
+                <div class="row-list"><span>⚡ Cashback Loans cycle</span><span>$300 debit + $255 credit</span><span class="tag critical">high-cost borrowing</span></div>
+                <div class="small-note">💡 Cash advance cycle reduces net cash: each $300 advance costs ~$45 in fees / interest.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= TAB 2: CATEGORIES ================= -->
+    <div id="tab-categories" class="tab-content">
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-label">🍔 TOP SPENDING CATEGORY</div><div class="stat-number">Food & Dining</div><div class="stat-trend">~$580 (Uber Eats + restaurants)</div></div>
+            <div class="stat-card"><div class="stat-label">🚗 AUTO & TRANSPORT</div><div class="stat-number">$670+</div><div class="stat-trend">Toyota payments + gas + insurance</div></div>
+            <div class="stat-card"><div class="stat-label">🏦 LOAN & CASH ADVANCE</div><div class="stat-number">$915</div><div class="stat-trend">OneMain + Cashback Loans</div></div>
+            <div class="stat-card"><div class="stat-label">🛍️ SHOPPING / SUBSCRIPTIONS</div><div class="stat-number">~$210</div><div class="stat-trend">Amazon, Target, streaming</div></div>
+        </div>
+        <div class="two-col">
+            <div class="card-panel">
+                <div class="card-header">📂 Spending breakdown (last 90 days)</div>
+                <div class="card-body">
+                    <div class="row-list"><span>🍽️ Food & Dining (Uber Eats, restaurants)</span><strong>$582.41</strong><span class="tag">high frequency</span></div>
+                    <div class="progress-bg"><div class="progress-fill" style="width:34%; background:#e67e22;"></div></div>
+                    <div class="row-list"><span>🚘 Auto (Toyota + gas + Kemper)</span><strong>$671.89</strong><span class="tag">essential</span></div>
+                    <div class="progress-bg"><div class="progress-fill" style="width:39%; background:#4f9da6;"></div></div>
+                    <div class="row-list"><span>🏦 Loan payments (OneMain, LendingPoint)</span><strong>$379.66</strong></div>
+                    <div class="row-list"><span>⚡ Cashback Loans (advance cycle)</span><strong>$600 debit / $510 credit</strong><span class="tag critical">net -$90 + fees</span></div>
+                    <div class="row-list"><span>🛍️ Shopping (Amazon, Target, Walmart)</span><strong>$188.42</strong></div>
+                    <div class="insight-badge">📌 Cashback Loans pattern: withdraw $300, later repay $255 → effective loss ~$45 each cycle.</div>
+                </div>
+            </div>
+            <div class="card-panel">
+                <div class="card-header">🏷️ Tagged spend & improvement areas</div>
+                <div class="card-body">
+                    <div class="row-list"><span>🍕 Uber Eats / delivery fees</span><span>$200+ (multiple small orders)</span><span class="tag advice">reduce by meal planning</span></div>
+                    <div class="row-list"><span>💳 Subscription & recurring</span><span>Peacock, Prime, CarePass ~$20/mo</span><span class="tag save">review necessity</span></div>
+                    <div class="row-list"><span>🏦 Brigit & Afterpay fees</span><span>$50.99 + $15.11</span><span>BNPL interest adds up</span></div>
+                    <div class="tag save" style="margin-top: 8px;">✅ Simple switch: replace 3 Uber Eats orders with grocery -> save ~$80/month.</div>
+                </div>
+            </div>
+        </div>
+        <div class="card-panel full-width">
+            <div class="card-header">🎯 Categorized action board</div>
+            <div class="card-body">
+                <div class="row-list"><span>🥡 Reduce dining & delivery by 25%</span><span>→ ~$140 monthly saving</span><span class="tag save">high impact</span></div>
+                <div class="row-list"><span>🚗 Refinance or review auto insurance (Kemper $150+)</span><span>shop around</span></div>
+                <div class="row-list"><span>💰 Stop Cashback Loans cycle: build $200 emergency fund</span><span>saves $45 per loop</span></div>
+                <div class="small-note">🔹 Afterpay/Klarna/Sezzle installments appear frequently — consider consolidating to avoid multiple micro-debits.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= TAB 3: TRENDS ================= -->
+    <div id="tab-trends" class="tab-content">
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-label">📉 CASHFLOW TREND (MoM)</div><div class="stat-number">-2.3%</div><div class="stat-trend">Outflow slightly > inflow</div></div>
+            <div class="stat-card"><div class="stat-label">🔄 CASH ADVANCE CYCLE</div><div class="stat-number">$90 net loss</div><div class="stat-trend">each $300 advance costs ~$45</div></div>
+            <div class="stat-card"><div class="stat-label">📊 PROJECTED BUFFER</div><div class="stat-number">$0–$35</div><div class="stat-trend">if spending continues same pattern</div></div>
+            <div class="stat-card"><div class="stat-label">⚠️ LOW BALANCE ALERT</div><div class="stat-number">75% of days</div><div class="stat-trend">balance &lt;$100 after large bills</div></div>
+        </div>
+        <div class="two-col">
+            <div class="card-panel">
+                <div class="card-header">📈 Trend: Income vs Essential expenses</div>
+                <div class="card-body">
+                    <div class="row-list"><span>💰 Avg monthly income</span><span>$2,085</span><span>Action Gypsum payroll</span></div>
+                    <div class="row-list"><span>🏠 Essential (Auto + Loan + Insurance)</span><span>$1,024/mo</span><span class="tag">fixed</span></div>
+                    <div class="row-list"><span>🍽️ Discretionary (Food delivery + shopping)</span><span>$580/mo</span><span class="tag advice">cut by 20% = $116 saved</span></div>
+                    <div class="progress-bg"><div class="progress-fill" style="width:49%; background:#1f7840;"></div><div style="background:#cd5c5c; width:28%;"></div></div>
+                    <div class="small-note">If discretionary reduced by $100, monthly surplus could reach +$60 instead of negative.</div>
+                </div>
+            </div>
+            <div class="card-panel">
+                <div class="card-header">🔮 Projection: "Small changes" scenario</div>
+                <div class="card-body">
+                    <div class="row-list"><span>✅ Cut 4 Uber Eats orders/month</span><span>→ save $75</span></div>
+                    <div class="row-list"><span>✅ Stop Cashback Loans cycle</span><span>→ save $45/month</span></div>
+                    <div class="row-list"><span>✅ Reduce Afterpay/Brigit by half</span><span>→ save $45</span></div>
+                    <div class="insight-badge">🌟 <strong>Potential monthly saving: ~$165</strong> — enough to build emergency fund & avoid late fees.</div>
+                </div>
+            </div>
+        </div>
+        <div class="card-panel full-width">
+            <div class="card-header">📅 Trend-based recommendations</div>
+            <div class="card-body">
+                <div class="row-list"><span>⚡ Cash advance trap</span><span>Pattern: Cashback Loans debit $300, later credit $255 → net -$45 + interest. Break the cycle with a $200 mini-savings.</span></div>
+                <div class="row-list"><span>📆 Paycheck timing</span><span>Paydays ~9th and 23rd. Large debits (Toyota, OneMain) hit right after → schedule them for 2 days after payday to avoid low balance.</span></div>
+                <div class="row-list"><span>💸 Overdraft prevention</span><span>Enable low-balance alert at $100, auto-transfer $25 from savings as buffer.</span></div>
+                <div class="tag save" style="margin-top: 6px;">📌 Simple 30-day goal: reduce delivery apps by 50% and avoid new Cashback Loans.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-note">
+        📊 Based on actual CSV statement data (Action Gypsum, loan payments, Uber Eats, cash advances). This dashboard is for financial awareness only.
+    </div>
+</div>
+
+<script>
+    const tabs = ['transactions', 'categories', 'trends'];
+    const contents = {
+        transactions: document.getElementById('tab-transactions'),
+        categories: document.getElementById('tab-categories'),
+        trends: document.getElementById('tab-trends')
+    };
+    const btns = document.querySelectorAll('.tab-btn');
+
+    function activateTab(tabId) {
+        tabs.forEach(id => contents[id].classList.remove('active-tab'));
+        contents[tabId].classList.add('active-tab');
+        btns.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.getAttribute('data-tab') === tabId) btn.classList.add('active');
+        });
+    }
+    btns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-tab');
+            if (id && contents[id]) activateTab(id);
+        });
+    });
+    if (!contents.transactions.classList.contains('active-tab')) activateTab('transactions');
+</script>
+</body>
+</html>

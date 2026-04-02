@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Financial Dashboard - Enhanced Alerts</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Outfit:wght@300;400;500;600;700&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --ink: #1a1a2e; --paper: #f8f6f1; --accent: #e94560;
+            --success: #16db93; --warning: #f49d37; --neutral: #6c757d;
+            --shadow: rgba(26, 26, 46, 0.08); --shadow-heavy: rgba(26, 26, 46, 0.15);
+            --info: #3498db; --orange: #ff6b35;
+        }
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #f8f6f1 0%, #e8e4db 100%);
+            color: var(--ink); min-height: 100vh; padding: 2rem; line-height: 1.6;
+        }
+        
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        header { margin-bottom: 2rem; }
+        h1 { font-family: 'DM Serif Display', serif; font-size: 3.5rem; font-weight: normal; margin-bottom: 0.5rem; }
+        .subtitle { font-size: 1.1rem; color: var(--neutral); font-weight: 300; margin-bottom: 1.5rem; }
+        
+        .file-upload {
+            padding: 0.75rem 1.5rem; background: var(--accent); color: white; border: none;
+            border-radius: 8px; cursor: pointer; font-family: 'Outfit', sans-serif; font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .file-upload:hover { background: #d63850; transform: translateY(-2px); }
+        
+        .alert-section { margin-bottom: 2rem; }
+        .alert-section h2 { margin-bottom: 1rem; font-size: 1.5rem; }
+        
+        .alert {
+            background: white; border-left: 4px solid var(--warning); padding: 1.5rem;
+            border-radius: 12px; margin-bottom: 1rem; box-shadow: 0 4px 12px var(--shadow);
+            display: flex; gap: 1rem; align-items: flex-start; animation: slideIn 0.4s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .alert.critical { 
+            border-left-color: var(--accent); 
+            background: linear-gradient(135deg, #fff5f5 0%, white 100%);
+        }
+        .alert.warning { 
+            border-left-color: var(--warning); 
+            background: linear-gradient(135deg, #fffbf0 0%, white 100%);
+        }
+        .alert.info { 
+            border-left-color: var(--info); 
+            background: linear-gradient(135deg, #f0f7ff 0%, white 100%);
+        }
+        .alert.success { 
+            border-left-color: var(--success); 
+            background: linear-gradient(135deg, #f0fff4 0%, white 100%);
+        }
+        
+        .alert-icon { font-size: 2rem; flex-shrink: 0; line-height: 1; }
+        .alert-content { flex: 1; }
+        .alert-content h3 { 
+            font-size: 1.05rem; font-weight: 600; margin-bottom: 0.5rem;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .alert-content p { font-size: 0.95rem; color: var(--neutral); line-height: 1.6; }
+        
+        .alert-actions { margin-top: 1rem; display: flex; gap: 0.75rem; flex-wrap: wrap; }
+        .alert-btn {
+            padding: 0.5rem 1.25rem; border: none; border-radius: 6px;
+            cursor: pointer; font-size: 0.9rem; font-weight: 500; font-family: 'Outfit', sans-serif;
+            transition: all 0.3s ease;
+        }
+        .alert-btn.primary {
+            background: var(--ink); color: white;
+        }
+        .alert-btn.primary:hover {
+            background: #2a2a42; transform: translateY(-2px);
+        }
+        .alert-btn.secondary {
+            background: white; color: var(--ink); border: 2px solid var(--ink);
+        }
+        .alert-btn.secondary:hover {
+            background: var(--ink); color: white;
+        }
+        
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        
+        .card {
+            background: white; border-radius: 16px; padding: 2rem;
+            box-shadow: 0 8px 24px var(--shadow); transition: all 0.3s ease;
+        }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px var(--shadow-heavy); }
+        
+        .card-title { font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--neutral); margin-bottom: 1rem; }
+        .value { font-family: 'DM Serif Display', serif; font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .value.negative { color: var(--accent); }
+        .value.positive { color: var(--success); }
+        
+        .badge {
+            display: inline-block; padding: 0.25rem 0.75rem; border-radius: 6px;
+            font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+        }
+        .badge.critical { background: #fee; color: var(--accent); }
+        .badge.warning { background: #ffefd5; color: var(--warning); }
+        .badge.success { background: #e6f9f0; color: var(--success); }
+        
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+        .stat-item { background: var(--paper); padding: 1.25rem; border-radius: 12px; text-align: center; }
+        .stat-value { font-family: 'DM Serif Display', serif; font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .stat-label { font-size: 0.85rem; color: var(--neutral); }
+        
+        .wide-card { grid-column: 1 / -1; }
+        
+        .empty-state {
+            text-align: center; padding: 3rem; color: var(--neutral);
+        }
+        .empty-state h2 { font-size: 1.5rem; margin-bottom: 1rem; color: var(--ink); }
+        
+        @media (max-width: 768px) {
+            body { padding: 1rem; }
+            h1 { font-size: 2.5rem; }
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .alert-actions { flex-direction: column; }
+            .alert-btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 Smart Financial Dashboard</h1>
+            <p class="subtitle">Intelligent alerts with actionable insights for your financial health</p>
+            <input type="file" id="fileInput" accept=".json" style="display: none;" onchange="loadFile(event)">
+            <button class="file-upload" onclick="document.getElementById('fileInput').click()">
+                📂 Load Customer Data (JSON)
+            </button>
+        </header>
+        
+        <div id="content">
+            <div class="empty-state">
+                <h2>👋 Welcome!</h2>
+                <p>Load your transaction data to see personalized alerts and insights.</p>
+                <p style="margin-top: 1rem; font-size: 0.9rem;">
+                    This dashboard includes <strong>20+ intelligent alerts</strong> including:
+                </p>
+                <div style="margin-top: 1.5rem; text-align: left; max-width: 600px; margin-left: auto; margin-right: auto;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.9rem;">
+                        <div>✅ Low balance warnings</div>
+                        <div>✅ Upcoming bill reminders</div>
+                        <div>✅ Missing payment alerts</div>
+                        <div>✅ Spending insights</div>
+                        <div>✅ Subscription tracking</div>
+                        <div>✅ ATM withdrawal analysis</div>
+                        <div>✅ Payday patterns</div>
+                        <div>✅ Positive achievements</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let DATA = null;
+        
+        function loadFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    DATA = JSON.parse(e.target.result);
+                    render();
+                } catch (error) {
+                    alert('Error loading file: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+        
+        function render() {
+            const alerts = generateAlerts(DATA);
+            const analysis = analyzeData(DATA);
+            
+            // Separate alerts by type
+            const critical = alerts.filter(a => a.type === 'critical');
+            const warnings = alerts.filter(a => a.type === 'warning');
+            const info = alerts.filter(a => a.type === 'info');
+            const success = alerts.filter(a => a.type === 'success');
+            
+            let alertHTML = '';
+            
+            if (critical.length > 0) {
+                alertHTML += '<div style="margin-bottom: 2rem;"><h3 style="color: var(--accent); font-size: 1.2rem; margin-bottom: 1rem;">🚨 Critical Alerts</h3>';
+                alertHTML += critical.map(renderAlert).join('');
+                alertHTML += '</div>';
+            }
+            
+            if (warnings.length > 0) {
+                alertHTML += '<div style="margin-bottom: 2rem;"><h3 style="color: var(--warning); font-size: 1.2rem; margin-bottom: 1rem;">⚠️ Warnings</h3>';
+                alertHTML += warnings.map(renderAlert).join('');
+                alertHTML += '</div>';
+            }
+            
+            if (info.length > 0) {
+                alertHTML += '<div style="margin-bottom: 2rem;"><h3 style="color: var(--info); font-size: 1.2rem; margin-bottom: 1rem;">ℹ️ Insights</h3>';
+                alertHTML += info.map(renderAlert).join('');
+                alertHTML += '</div>';
+            }
+            
+            if (success.length > 0) {
+                alertHTML += '<div style="margin-bottom: 2rem;"><h3 style="color: var(--success); font-size: 1.2rem; margin-bottom: 1rem;">✅ Positive News</h3>';
+                alertHTML += success.map(renderAlert).join('');
+                alertHTML += '</div>';
+            }
+            
+            if (alerts.length === 0) {
+                alertHTML = '<div class="alert success"><div class="alert-icon">✅</div><div class="alert-content"><h3>All Clear!</h3><p>No urgent issues detected. You\'re managing your finances well!</p></div></div>';
+            }
+            
+            document.getElementById('content').innerHTML = `
+                <div class="alert-section">
+                    <h2>⚡ Your Smart Alerts (${alerts.length})</h2>
+                    ${alertHTML}
+                </div>
+                
+                <div class="dashboard-grid">
+                    ${renderMetricCard('Current Balance', fmt(analysis.balance), analysis.balance < 0 ? 'Overdrawn' : 'Available', analysis.balance < 0 ? 'negative' : 'positive')}
+                    ${renderMetricCard('Monthly Income', fmt(analysis.income), `${analysis.incomeCount} deposits`, 'positive')}
+                    ${renderMetricCard('Monthly Spending', fmt(analysis.spending), `${analysis.savingsRate}% savings rate`, '')}
+                    ${renderMetricCard('Health Score', analysis.score, getHealthLabel(analysis.score), '')}
+                </div>
+                
+                <div class="wide-card card">
+                    <h2 class="card-title">Account Statistics</h2>
+                    ${renderStats(analysis)}
+                </div>
+            `;
+        }
+        
+        function generateAlerts(data) {
+            const alerts = [];
+            const txns = data.transactionSummaries || [];
+            const accounts = data.accounts || [];
+            const totalBalance = accounts.reduce((s, a) => s + (a.balance || 0), 0);
+            
+            // Calculate average paycheck
+            const incomeTxns = txns.filter(t => (t.is_income || t.is_direct_deposit) && !isLoan(t));
+            const avgPaycheck = incomeTxns.length > 0 ? 
+                incomeTxns.reduce((s, t) => s + Math.abs(t.amount), 0) / incomeTxns.length : 0;
+            
+            // 1. VERY LOW BALANCE ALERT (Critical)
+            if (totalBalance > 0 && totalBalance < 10) {
+                alerts.push({
+                    type: 'critical',
+                    icon: '🔴',
+                    title: 'Very Low Balance Alert',
+                    message: `Your balance is very low at ${fmt(totalBalance)}. Check your upcoming payments to avoid fees.`,
+                    priority: 1,
+                    actions: ['View upcoming bills', 'Get cash to top-up now']
+                });
+            }
+            // 2. LOW BALANCE ALERT (Warning)
+            else if (totalBalance > 0 && (totalBalance < 50 || totalBalance < avgPaycheck * 0.1)) {
+                alerts.push({
+                    type: 'warning',
+                    icon: '💰',
+                    title: 'Low Balance Alert',
+                    message: `Your balance is getting low at ${fmt(totalBalance)}. You may want to keep an eye on upcoming payments.`,
+                    priority: 2,
+                    actions: ['View upcoming bills', 'Get cash to top-up now']
+                });
+            }
+            
+            // 3. NEGATIVE BALANCE
+            if (totalBalance < 0) {
+                alerts.push({
+                    type: 'critical',
+                    icon: '⚠️',
+                    title: 'Account Overdrawn',
+                    message: `Your account is overdrawn by ${fmt(Math.abs(totalBalance))}. Deposit funds immediately to avoid additional fees.`,
+                    priority: 1,
+                    actions: ['Get cash to top-up now', 'View transaction history']
+                });
+            }
+            
+            // 4. RECURRING PAYMENT DETECTION & ALERTS
+            const recurringMerchants = identifyRecurringMerchants(txns);
+            
+            // Upcoming bill reminders
+            recurringMerchants.forEach(merchant => {
+                const daysUntilNext = merchant.daysUntilNext;
+                if (daysUntilNext >= 0 && daysUntilNext <= 3) {
+                    const lowBalance = totalBalance < merchant.avgAmount;
+                    alerts.push({
+                        type: 'info',
+                        icon: '📅',
+                        title: 'Upcoming Bill Reminder',
+                        message: `Your ${fmt(merchant.avgAmount)} ${merchant.name} payment is expected in ${daysUntilNext} day${daysUntilNext !== 1 ? 's' : ''}.${lowBalance ? ' Low on balance?' : ''}`,
+                        priority: 3,
+                        actions: lowBalance ? ['Get cash to top-up now'] : []
+                    });
+                }
+            });
+            
+            // Missing recurring payment
+            recurringMerchants.forEach(merchant => {
+                if (merchant.missedPayment) {
+                    alerts.push({
+                        type: 'warning',
+                        icon: '🔴',
+                        title: 'Recurring Payment Not Seen',
+                        message: `Your usual ${fmt(merchant.avgAmount)} ${merchant.name} payment hasn't been seen this month.`,
+                        priority: 2
+                    });
+                }
+            });
+            
+            // 5. SPENDING HIGHER THAN LAST MONTH
+            const last30Days = getLast30DaysSpending(txns);
+            const prior30Days = getPrior30DaysSpending(txns);
+            if (prior30Days > 0) {
+                const increase = (last30Days - prior30Days) / prior30Days;
+                if (increase > 0.15) {
+                    alerts.push({
+                        type: 'info',
+                        icon: '📊',
+                        title: 'Spending Higher Than Last Month',
+                        message: `Your spending is ${(increase * 100).toFixed(0)}% higher than last month (${fmt(last30Days)} vs ${fmt(prior30Days)}).`,
+                        priority: 4
+                    });
+                }
+            }
+            
+            // 6. HIGH ATM WITHDRAWALS
+            const atmTxns = txns.filter(t => 
+                t.type === 'DEBIT' && t.description && 
+                (t.description.includes('ATM') || t.description.includes('CASH'))
+            );
+            const totalATM = atmTxns.reduce((s, t) => s + Math.abs(t.amount), 0);
+            const totalSpending = txns.filter(t => t.type === 'DEBIT' && !t.is_fee)
+                .reduce((s, t) => s + Math.abs(t.amount), 0);
+            
+            if (totalSpending > 0 && totalATM / totalSpending > 0.20) {
+                alerts.push({
+                    type: 'warning',
+                    icon: '🟠',
+                    title: 'High ATM Withdrawals',
+                    message: `You've withdrawn ${fmt(totalATM)} in cash recently (${((totalATM / totalSpending) * 100).toFixed(0)}% of spending).`,
+                    priority: 3
+                });
+            }
+            
+            // 7. SUBSCRIPTION BUILD-UP
+            const subscriptions = identifySubscriptions(txns);
+            const totalSubCost = subscriptions.reduce((s, sub) => s + sub.avgAmount, 0);
+            
+            if (subscriptions.length >= 5 || totalSubCost > 100) {
+                alerts.push({
+                    type: 'warning',
+                    icon: '🟠',
+                    title: 'Subscription Build-Up',
+                    message: `You have ${fmt(totalSubCost)}/month in ${subscriptions.length} subscriptions. Review to see if all are needed.`,
+                    priority: 3
+                });
+            }
+            
+            // 8. TIGHT PAYDAY WINDOW
+            const paydayPattern = analyzePaydayPattern(txns);
+            if (paydayPattern.tightWindow) {
+                alerts.push({
+                    type: 'warning',
+                    icon: '🟠',
+                    title: 'Tight Payday Window',
+                    message: 'Most of your balance is used within a few days of payday. Consider budgeting to maintain a buffer.',
+                    priority: 3
+                });
+            }
+            
+            // 9. OVERDRAFT FEES
+            const recentFees = txns.filter(t => t.is_overdraft_fee && daysSince(t.date) <= 7);
+            if (recentFees.length > 0) {
+                const total = recentFees.reduce((s, t) => s + Math.abs(t.amount), 0);
+                alerts.push({
+                    type: 'critical',
+                    icon: '💸',
+                    title: 'Overdraft Fees Charged',
+                    message: `You were charged ${fmt(total)} in overdraft fees this week.`,
+                    priority: 1
+                });
+            }
+            
+            // 10. HIGH NSF COUNT
+            const nsfCount = txns.filter(t => 
+                t.is_overdraft_fee || 
+                (t.description && t.description.toLowerCase().includes('nsf'))
+            ).length;
+            
+            if (nsfCount > 20) {
+                alerts.push({
+                    type: 'critical',
+                    icon: '🚨',
+                    title: 'High NSF Activity',
+                    message: `You've had ${nsfCount} NSF incidents. This impacts your financial health.`,
+                    priority: 1
+                });
+            }
+            
+            // POSITIVE ALERTS
+            
+            // 11. NO FEES THIS MONTH
+            const thisMonth = new Date().toISOString().substring(0, 7);
+            const thisMonthFees = txns.filter(t => 
+                t.is_overdraft_fee && t.date.startsWith(thisMonth)
+            );
+            if (thisMonthFees.length === 0 && nsfCount > 5) {
+                alerts.push({
+                    type: 'success',
+                    icon: '✅',
+                    title: 'No Overdraft Fees This Month!',
+                    message: 'Excellent! You\'ve avoided overdraft fees this month. Keep up the good work.',
+                    priority: 5
+                });
+            }
+            
+            // 12. POSITIVE CASHFLOW
+            const months = calculateMonthlyBreakdown(txns);
+            const lastMonth = months[months.length - 1];
+            if (lastMonth && lastMonth.income > lastMonth.spending) {
+                const surplus = lastMonth.income - lastMonth.spending;
+                alerts.push({
+                    type: 'success',
+                    icon: '📈',
+                    title: 'Positive Cashflow',
+                    message: `Great job! Last month you earned ${fmt(surplus)} more than you spent.`,
+                    priority: 5
+                });
+            }
+            
+            // Sort by priority
+            return alerts.sort((a, b) => a.priority - b.priority);
+        }
+        
+        function renderAlert(alert) {
+            const actionsHTML = alert.actions && alert.actions.length > 0 ? `
+                <div class="alert-actions">
+                    ${alert.actions.map((action, i) => 
+                        `<button class="alert-btn ${i === 0 ? 'primary' : 'secondary'}" onclick="handleAction('${action}')">${action}</button>`
+                    ).join('')}
+                </div>
+            ` : '';
+            
+            return `
+                <div class="alert ${alert.type}">
+                    <div class="alert-icon">${alert.icon}</div>
+                    <div class="alert-content">
+                        <h3>${alert.title}</h3>
+                        <p>${alert.message}</p>
+                        ${actionsHTML}
+                    </div>
+                </div>
+            `;
+        }
+        
+        function handleAction(action) {
+            // Placeholder for action handlers
+            console.log('Action clicked:', action);
+            alert(`Action: ${action}\n\nThis would connect to your app's functionality.`);
+        }
+        
+        function identifyRecurringMerchants(txns) {
+            const merchants = {};
+            const today = new Date();
+            
+            txns.forEach(t => {
+                if (t.type === 'DEBIT' && !t.is_fee && !isLoan(t)) {
+                    const name = cleanMerchantName(t.description);
+                    if (!merchants[name]) {
+                        merchants[name] = { name, transactions: [], amounts: [] };
+                    }
+                    merchants[name].transactions.push(t);
+                    merchants[name].amounts.push(Math.abs(t.amount));
+                }
+            });
+            
+            return Object.values(merchants)
+                .filter(m => m.transactions.length >= 2)
+                .map(m => {
+                    const avgAmount = m.amounts.reduce((s, a) => s + a, 0) / m.amounts.length;
+                    const dates = m.transactions.map(t => new Date(t.date)).sort((a, b) => a - b);
+                    
+                    // Calculate average days between
+                    let totalDays = 0;
+                    for (let i = 1; i < dates.length; i++) {
+                        totalDays += (dates[i] - dates[i-1]) / 86400000;
+                    }
+                    const avgDaysBetween = totalDays / (dates.length - 1);
+                    
+                    // Predict next charge
+                    const lastDate = dates[dates.length - 1];
+                    const nextExpected = new Date(lastDate);
+                    nextExpected.setDate(nextExpected.getDate() + avgDaysBetween);
+                    
+                    const daysUntilNext = Math.ceil((nextExpected - today) / 86400000);
+                    
+                    // Check if payment is missing
+                    const thisMonth = today.toISOString().substring(0, 7);
+                    const hasThisMonthPayment = m.transactions.some(t => t.date.startsWith(thisMonth));
+                    const missedPayment = daysUntilNext < -5 && !hasThisMonthPayment;
+                    
+                    return {
+                        name: m.name,
+                        avgAmount,
+                        count: m.transactions.length,
+                        avgDaysBetween,
+                        daysUntilNext,
+                        missedPayment
+                    };
+                });
+        }
+        
+        function identifySubscriptions(txns) {
+            const merchants = identifyRecurringMerchants(txns);
+            return merchants.filter(m => 
+                m.avgDaysBetween >= 25 && m.avgDaysBetween <= 35 // Monthly
+            );
+        }
+        
+        function analyzePaydayPattern(txns) {
+            const incomeTxns = txns.filter(t => (t.is_income || t.is_direct_deposit) && !isLoan(t));
+            if (incomeTxns.length < 2) return { tightWindow: false };
+            
+            // Check if balance drops quickly after payday
+            let tightCount = 0;
+            incomeTxns.forEach(income => {
+                const incomeDate = new Date(income.date);
+                const threeDaysLater = new Date(incomeDate);
+                threeDaysLater.setDate(threeDaysLater.getDate() + 3);
+                
+                // Check spending in next 3 days
+                const spending = txns.filter(t => {
+                    const tDate = new Date(t.date);
+                    return t.type === 'DEBIT' && tDate > incomeDate && tDate <= threeDaysLater;
+                }).reduce((s, t) => s + Math.abs(t.amount), 0);
+                
+                if (spending > Math.abs(income.amount) * 0.7) {
+                    tightCount++;
+                }
+            });
+            
+            return { tightWindow: tightCount >= Math.min(3, incomeTxns.length * 0.5) };
+        }
+        
+        function cleanMerchantName(desc) {
+            if (!desc) return 'Unknown';
+            return desc.split(/\s+/).slice(0, 3).join(' ').substring(0, 30);
+        }
+        
+        function getLast30DaysSpending(txns) {
+            const cutoff = new Date();
+            cutoff.setDate(cutoff.getDate() - 30);
+            return txns.filter(t => 
+                t.type === 'DEBIT' && 
+                !t.is_fee && 
+                new Date(t.date) >= cutoff
+            ).reduce((s, t) => s + Math.abs(t.amount), 0);
+        }
+        
+        function getPrior30DaysSpending(txns) {
+            const start = new Date();
+            start.setDate(start.getDate() - 60);
+            const end = new Date();
+            end.setDate(end.getDate() - 30);
+            return txns.filter(t => 
+                t.type === 'DEBIT' && 
+                !t.is_fee && 
+                new Date(t.date) >= start && 
+                new Date(t.date) < end
+            ).reduce((s, t) => s + Math.abs(t.amount), 0);
+        }
+        
+        function analyzeData(data) {
+            const txns = data.transactionSummaries || [];
+            const accounts = data.accounts || [];
+            
+            const balance = accounts.reduce((s, a) => s + (a.balance || 0), 0);
+            
+            const incomeTxns = txns.filter(t => (t.is_income || t.is_direct_deposit) && !isLoan(t));
+            const dateRange = getDateRange(txns);
+            const months = dateRange.days / 30 || 1;
+            
+            const totalIncome = incomeTxns.reduce((s, t) => s + Math.abs(t.amount), 0);
+            const income = totalIncome / months;
+            
+            const expenses = txns.filter(t => t.type === 'DEBIT' && !t.is_fee);
+            const totalSpending = expenses.reduce((s, t) => s + Math.abs(t.amount), 0);
+            const spending = totalSpending / months;
+            
+            const savingsRate = income > 0 ? ((income - spending) / income * 100) : 0;
+            
+            const nsfCount = txns.filter(t => t.is_overdraft_fee).length;
+            const fees = txns.filter(t => t.is_fee).reduce((s, t) => s + Math.abs(t.amount), 0);
+            
+            let score = 100;
+            if (balance < 0) score -= 20;
+            if (nsfCount > 10) score -= 20;
+            if (nsfCount > 50) score -= 20;
+            if (income < spending) score -= 20;
+            if (fees > 100) score -= 10;
+            score = Math.max(0, score);
+            
+            return {
+                balance,
+                income,
+                spending,
+                savingsRate: savingsRate.toFixed(0),
+                nsf: nsfCount,
+                fees,
+                score,
+                incomeCount: incomeTxns.length,
+                txnCount: txns.length,
+                days: dateRange.days
+            };
+        }
+        
+        function calculateMonthlyBreakdown(txns) {
+            const monthly = {};
+            txns.forEach(t => {
+                const month = t.date.substring(0, 7);
+                if (!monthly[month]) monthly[month] = { income: 0, spending: 0 };
+                const amt = Math.abs(t.amount || 0);
+                if (t.type === 'CREDIT' && (t.is_income || t.is_direct_deposit) && !isLoan(t)) {
+                    monthly[month].income += amt;
+                } else if (t.type === 'DEBIT' && !t.is_fee) {
+                    monthly[month].spending += amt;
+                }
+            });
+            return Object.entries(monthly).map(([month, data]) => ({ month, ...data }));
+        }
+        
+        function renderMetricCard(title, value, subtitle, className) {
+            return `
+                <div class="card">
+                    <h2 class="card-title">${title}</h2>
+                    <div class="value ${className}">${value}</div>
+                    <p style="color: var(--neutral); font-size: 0.9rem;">${subtitle}</p>
+                </div>
+            `;
+        }
+        
+        function renderStats(a) {
+            return `
+                <div class="stat-grid">
+                    <div class="stat-item">
+                        <div class="stat-value">${a.txnCount}</div>
+                        <div class="stat-label">Transactions</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${a.days}</div>
+                        <div class="stat-label">Days Analyzed</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${a.nsf}</div>
+                        <div class="stat-label">NSF Incidents</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${fmt(a.fees)}</div>
+                        <div class="stat-label">Fees Paid</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function isLoan(t) {
+            const d = ((t.description || '') + (t.original_description || '')).toLowerCase();
+            return ['loan', 'lending', 'advance', 'lendumo', 'vola'].some(k => d.includes(k));
+        }
+        
+        function getDateRange(txns) {
+            if (!txns.length) return { days: 0 };
+            const dates = txns.map(t => new Date(t.date)).sort((a, b) => a - b);
+            return { days: Math.ceil((dates[dates.length - 1] - dates[0]) / 86400000) };
+        }
+        
+        function daysSince(date) {
+            return Math.ceil((new Date() - new Date(date)) / 86400000);
+        }
+        
+        function getHealthLabel(score) {
+            if (score >= 80) return '🌟 Excellent';
+            if (score >= 60) return '✓ Good';
+            if (score >= 40) return '⚠️ Fair';
+            return '⚠️ Needs Work';
+        }
+        
+        function fmt(n) {
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(n);
+        }
+    </script>
+</body>
+</html>
