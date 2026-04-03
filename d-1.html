@@ -33,7 +33,7 @@
             gap: 20px;
             margin-bottom: 28px;
         }
-        h1 {
+        .header-left h1 {
             font-size: 1.8rem;
             font-weight: 700;
             letter-spacing: -0.3px;
@@ -42,13 +42,56 @@
             -webkit-background-clip: text;
             color: transparent;
         }
-        .m-t{
-            margin-top: 30px;
-        }
         .subhead {
             color: #4a6f8f;
             font-size: 0.85rem;
             margin-top: 4px;
+        }
+        
+        /* Selector controls */
+        .selector-group {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 60px;
+            border: 1px solid #d4e2ed;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+        .selector-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .selector-item label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #5e7e9c;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .selector-item select {
+            padding: 6px 12px;
+            border-radius: 40px;
+            border: 1px solid #c5d5e2;
+            background: white;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #13294b;
+            cursor: pointer;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .selector-item select:hover {
+            border-color: #1b5a7a;
+            background: #f8fbfe;
+        }
+        .selector-item select:focus {
+            border-color: #1b5a7a;
+            box-shadow: 0 0 0 2px rgba(27,90,122,0.1);
         }
         .pill-group {
             display: flex;
@@ -66,6 +109,10 @@
         .pill.success { background: #e2f3e8; border-color: #b8dfcc; color: #1f7840; }
         .pill.alert { background: #ffe8e8; border-color: #fbc2c2; color: #bc4e5a; }
         .pill.warning { background: #fff0e5; border-color: #ffd8bc; color: #b85c1a; }
+
+        .m-t {
+            margin-top: 30px;
+        }
 
         /* tab navigation */
         .tab-bar {
@@ -155,6 +202,7 @@
             overflow: hidden;
             box-shadow: 0 2px 6px rgba(0,0,0,0.02);
         }
+        .card-panel:hover { box-shadow: 0 8px 20px -12px rgba(0,0,0,0.1); }
         .card-header {
             padding: 14px 20px;
             background: #fbfefe;
@@ -191,6 +239,7 @@
         .tag.save { background: #e0f2e8; color: #1f7840; }
         .tag.essential { background: #e9ecf3; color: #2c5e7e; }
         .tag.warning { background: #fff0e5; color: #b85c1a; }
+        .tag.success { background: #e2f3e8; color: #1f7840; }
 
         .tx-table {
             width: 100%;
@@ -246,17 +295,49 @@
             body { padding: 16px; }
             .two-col { grid-template-columns: 1fr; }
             .full-width { grid-column: span 1; }
+            .selector-group { width: 100%; justify-content: space-between; }
         }
         hr { margin: 12px 0; border: none; border-top: 1px solid #e2edf5; }
         .highlight { background: #e8f4fd; padding: 8px 12px; border-radius: 12px; margin: 8px 0; }
+        
+        /* Data update indicator */
+        .data-badge {
+            font-size: 0.65rem;
+            color: #6d8dab;
+            margin-left: 8px;
+            font-weight: normal;
+        }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
-        <div>
-            <h1>ROJA Insights</h1>
+        <div class="header-left">
+            <h1>ROJA Insights Prototype</h1>
             <div class="subhead">Your complete money picture · Simple steps to save more</div>
+        </div>
+        <div class="selector-group">
+            <div class="selector-item">
+                <label> MONTH</label>
+                <select id="monthSelector">
+                    <option value="all">Last 90 Days (All)</option>
+                    <option value="2025-09">September 2025</option>
+                    <option value="2025-08">August 2025</option>
+                    <option value="2025-07">July 2025</option>
+                    <option value="2025-06">June 2025</option>
+                    <option value="2025-05">May 2025</option>
+                    <option value="2025-04">April 2025</option>
+                    <option value="2025-03">March 2025</option>
+                </select>
+            </div>
+            <div class="selector-item">
+                <label>ACCOUNT</label>
+                <select id="accountSelector">
+                    <option value="all">All Accounts</option>
+                    <option value="checking">Checking (•••9007)</option>
+                    <option value="credit">Credit Card (•••0141)</option>
+                </select>
+            </div>
         </div>
     </div>
 
@@ -268,29 +349,27 @@
 
     <!-- ================= TAB 1: TRANSACTIONS REPORTS ================= -->
     <div id="tab-transactions" class="tab-content active-tab">
-        <!-- Quick stats -->
-        <div class="stats-grid">
-            <div class="stat-card"><div class="stat-label">💰 TOTAL INCOME (last 90d)</div><div class="stat-number">$6,254</div><div class="stat-trend">~$2,085/month</div></div>
-            <div class="stat-card"><div class="stat-label">📉 TOTAL EXPENSES (last 90d)</div><div class="stat-number">$6,819</div><div class="stat-trend">~$2,273/month</div></div>
-            <div class="stat-card"><div class="stat-label">⚠️ NET CASHFLOW</div><div class="stat-number" style="color:#cd5c5c;">-$565</div><div class="stat-trend">Spending $188 more than you earn each month</div></div>
+        <!-- Quick stats - dynamic data will update via JS -->
+        <div class="stats-grid" id="transactionsStats">
+            <div class="stat-card"><div class="stat-label">💰 TOTAL INCOME (last 90d)</div><div class="stat-number" id="totalIncome">$6,254</div><div class="stat-trend">~$2,085/month</div></div>
+            <div class="stat-card"><div class="stat-label">📉 TOTAL EXPENSES (last 90d)</div><div class="stat-number" id="totalExpenses">$6,819</div><div class="stat-trend">~$2,273/month</div></div>
+            <div class="stat-card"><div class="stat-label">⚠️ NET CASHFLOW</div><div class="stat-number" id="netCashflow" style="color:#cd5c5c;">-$565</div><div class="stat-trend">Spending $188 more than you earn each month</div></div>
         </div>
 
         <div class="two-col">
-            <!-- Income vs Expense Report -->
             <div class="card-panel">
                 <div class="card-header">📊 Income vs Expense (Monthly Average)</div>
-                <div class="card-body">
+                <div class="card-body" id="incomeExpenseBody">
                     <div class="row-list"><span>💵 Monthly Income</span><strong>$2,085</strong><span class="tag success">stable paychecks</span></div>
                     <div class="row-list"><span>📉 Monthly Expenses</span><strong class="amount-negative">$2,273</strong><span class="tag critical">-$188 shortfall</span></div>
                     <div class="row-list" style="background: #f8fafc; margin-top: 8px; border-radius: 12px;"><span><strong>Monthly Gap</strong></span><span class="amount-negative"><strong>-$188</strong></span><span>Need to cut or earn more</span></div>
-                    <div class="insight-badge">💡 <strong>What this means:</strong> You're spending $188 more than you earn each month. The good news: cutting just $50/week in delivery and subscriptions fixes this completely.</div>
+                    <div class="insight-badge">💡 <strong>What this means:</strong> You're spending $188 more than you earn each month. Cutting just $50/week in delivery and subscriptions fixes this completely.</div>
                 </div>
             </div>
 
-            <!-- NSF / Overdraft Report -->
             <div class="card-panel">
                 <div class="card-header">⚠️ NSF / Overdraft Report</div>
-                <div class="card-body">
+                <div class="card-body" id="nsfBody">
                     <div class="row-list"><span>💸 Overdraft Fees (90 days)</span><span>$13.00</span><span class="tag critical">avoidable</span></div>
                     <div class="row-list"><span>📉 Late Payment Fees</span><span>$39.00</span><span class="tag critical">missed due date</span></div>
                     <div class="row-list"><span>🏦 Maintenance Fees</span><span>$28.00</span><span>keep $500 min balance to waive</span></div>
@@ -302,10 +381,9 @@
         </div>
 
         <div class="two-col">
-            <!-- ATM Withdrawal Report -->
             <div class="card-panel">
                 <div class="card-header">🏧 ATM Withdrawal Report</div>
-                <div class="card-body">
+                <div class="card-body" id="atmBody">
                     <div class="row-list"><span>💰 Total ATM withdrawals (90d)</span><span>$308</span><span class="tag advice">~$103/month cash</span></div>
                     <div class="row-list"><span>📍 Bank of America ATM fees</span><span>$2.50 + $10 withdrawal fee</span><span class="tag warning">use in-network ATMs</span></div>
                     <div class="row-list"><span>💡 Tip</span><span>Withdraw larger amounts less often</span><span class="tag save">save on fees</span></div>
@@ -313,61 +391,54 @@
                 </div>
             </div>
 
-            <!-- Fee Analysis Report -->
             <div class="card-panel">
                 <div class="card-header">💸 Fee Analysis Report</div>
-                <div class="card-body">
+                <div class="card-body" id="feeBody">
                     <div class="row-list"><span>💳 Late Fee</span><span>$39</span><span class="tag critical">due 9/14 & 6/14</span></div>
                     <div class="row-list"><span>📈 Interest Charges</span><span>$21.71</span><span class="tag advice">carrying balance</span></div>
                     <div class="row-list"><span>🏦 Monthly Maintenance</span><span>$28</span><span>$8 + $10 + $10</span></div>
                     <div class="row-list"><span>⚠️ Overdraft / NSF</span><span>$13</span><span class="tag critical">low balance</span></div>
                     <div class="row-list"><span>💳 ATM / Withdrawal fees</span><span>$12.50</span><span>use your bank's ATM</span></div>
-                    <div class="insight-badge">🎯 <strong>$102 in fees last 90 days</strong> — that's a new phone or 10 Uber Eats deliveries. All avoidable with a $75 buffer.</div>
+                    <div class="insight-badge">🎯 <strong>$102 in fees last 90 days</strong> — All avoidable with a $75 buffer.</div>
                 </div>
             </div>
         </div>
 
         <div class="two-col">
-            <!-- Loan Payment Report -->
             <div class="card-panel">
                 <div class="card-header">🏦 Loan Payment Report</div>
-                <div class="card-body">
+                <div class="card-body" id="loanBody">
                     <div class="row-list"><span>🏦 OneMain Financial</span><span>$129.48/month</span><span class="tag essential">personal loan</span></div>
                     <div class="row-list"><span>🏦 LendingPoint</span><span>$101.70/month</span><span class="tag essential">personal loan</span></div>
                     <div class="row-list"><span>🚗 Toyota Auto Loan</span><span>$265/month (avg)</span><span class="tag essential">car payment</span></div>
                     <div class="row-list"><span><strong>Total monthly loan payments</strong></span><span><strong>$496</strong></span><span class="tag advice">24% of income</span></div>
-                    <div class="small-note">✅ Auto-pay is on. Consider paying a little extra to principal when possible to reduce interest.</div>
+                    <div class="small-note">✅ Auto-pay is on. Consider paying extra to principal when possible.</div>
                 </div>
             </div>
 
-            <!-- Repayment / Cash Advance Report -->
             <div class="card-panel">
                 <div class="card-header">🔄 Repayment & Cash Advance Report</div>
-                <div class="card-body">
+                <div class="card-body" id="cashAdvanceBody">
                     <div class="row-list"><span>⚡ Cashback Loans cycle</span><span>$300 debit → $255 credit</span><span class="tag critical">net -$45 each time</span></div>
                     <div class="row-list"><span>📉 Brigit Protection fees</span><span>$50.99 + $50.99</span><span class="tag warning">cash advance app</span></div>
                     <div class="row-list"><span>📉 Afterpay / BNPL payments</span><span>$15-$35 multiple times</span><span class="tag advice">buy now, pay later fees</span></div>
                     <div class="row-list"><span>💡 Total advance cost (90d)</span><span class="amount-negative">~$150+ in fees</span><span class="tag critical">stop the cycle!</span></div>
-                    <div class="insight-badge">🚨 <strong>Warning:</strong> Each Cashback Loan costs you $45. You've done this multiple times. Save $200 as an emergency fund to break this cycle forever.</div>
+                    <div class="insight-badge">🚨 <strong>Warning:</strong> Each Cashback Loan costs $45. Save $200 as an emergency fund to break this cycle forever.</div>
                 </div>
             </div>
         </div>
 
-        <!-- Recent Transactions List -->
         <div class="card-panel full-width">
-            <div class="card-header">📋 Recent Transactions (last 30 days)</div>
+            <div class="card-header">📋 Recent Transactions (last 30 days) <span class="data-badge" id="dataRangeBadge">Showing: All data</span></div>
             <div class="card-body" style="overflow-x: auto;">
-                <table class="tx-table">
+                <table class="tx-table" id="recentTransactionsTable">
                     <thead><tr><th>Date</th><th>Type</th><th>Amount</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td>2022-09-16</td><td class="debit">DEBIT</td><td class="debit">$11.40</td><td>Interest Charge</td></tr>
-                        <tr><td>2022-09-16</td><td class="credit">CREDIT</td><td class="credit">$40.00</td><td>Online payment</td></tr>
-                        <tr><td>2022-09-16</td><td class="debit">DEBIT</td><td class="debit">$50.99</td><td>Brigit Protection</td></tr>
-                        <tr><td>2022-09-16</td><td class="debit">DEBIT</td><td class="debit">$20.64</td><td>Amazon shopping</td></tr>
-                        <tr><td>2022-09-16</td><td class="credit">CREDIT</td><td class="credit">$738.39</td><td>Action Gypsum PAYCHECK</td></tr>
-                        <tr><td>2022-09-13</td><td class="debit">DEBIT</td><td class="debit">$38.10</td><td>Chevron gas</td></tr>
-                        <tr><td>2022-09-12</td><td class="debit">DEBIT</td><td class="debit">$38.90</td><td>Uber Eats</td></tr>
-                        <tr><td>2022-09-09</td><td class="credit">CREDIT</td><td class="credit">$740.21</td><td>Action Gypsum PAYCHECK</td></tr>
+                    <tbody id="recentTransactionsBody">
+                        <tr><td>2025-09-16</td><td class="debit">DEBIT</td><td class="debit">$11.40</td><td>Interest Charge</td></tr>
+                        <tr><td>2025-09-16</td><td class="credit">CREDIT</td><td class="credit">$40.00</td><td>Online payment</td></tr>
+                        <tr><td>2025-09-16</td><td class="debit">DEBIT</td><td class="debit">$50.99</td><td>Brigit Protection</td></tr>
+                        <tr><td>2025-09-16</td><td class="debit">DEBIT</td><td class="debit">$20.64</td><td>Amazon shopping</td></tr>
+                        <tr><td>2025-09-16</td><td class="credit">CREDIT</td><td class="credit">$738.39</td><td>Action Gypsum PAYCHECK</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -376,8 +447,7 @@
 
     <!-- ================= TAB 2: CATEGORIES & BUDGET ================= -->
     <div id="tab-categories" class="tab-content">
-        <!-- Top Categories KPI -->
-        <div class="stats-grid">
+        <div class="stats-grid" id="categoriesStats">
             <div class="stat-card"><div class="stat-label">🍽️ #1 SPENDING</div><div class="stat-number">Food & Dining</div><div class="stat-trend">$582 last 90d</div></div>
             <div class="stat-card"><div class="stat-label">🚗 #2 SPENDING</div><div class="stat-number">Auto & Transport</div><div class="stat-trend">$672 last 90d</div></div>
             <div class="stat-card"><div class="stat-label">🏦 #3 SPENDING</div><div class="stat-number">Loan Payments</div><div class="stat-trend">$380 last 90d</div></div>
@@ -385,10 +455,9 @@
         </div>
 
         <div class="two-col">
-            <!-- Spending Categories Breakdown -->
             <div class="card-panel">
                 <div class="card-header">📊 Spending Categories Breakdown (last 90 days)</div>
-                <div class="card-body">
+                <div class="card-body" id="spendingBreakdownBody">
                     <div class="row-list"><span>🍽️ Food & Dining</span><strong>$582</strong><span class="tag advice">Uber Eats + restaurants</span></div>
                     <div class="row-list"><span>🚗 Auto & Transport</span><strong>$672</strong><span class="tag essential">Toyota + gas + insurance</span></div>
                     <div class="row-list"><span>🏦 Loan Payments</span><strong>$380</strong><span class="tag essential">OneMain + LendingPoint</span></div>
@@ -401,10 +470,9 @@
                 </div>
             </div>
 
-            <!-- Budget Variance Report -->
             <div class="card-panel">
                 <div class="card-header">📊 Budget Variance Report</div>
-                <div class="card-body">
+                <div class="card-body" id="budgetVarianceBody">
                     <div class="small-note" style="margin-bottom: 8px;">Monthly actual vs. recommended US budget</div>
                     <div class="row-list"><span>🍽️ Food & Dining</span><span><strong>$582</strong> actual</span><span class="tag advice">vs $400 budget</span><span class="variance-positive">+$182 over</span></div>
                     <div class="row-list"><span>🚗 Auto & Transport</span><span><strong>$672</strong> actual</span><span class="tag essential">vs $550 budget</span><span class="variance-positive">+$122 over</span></div>
@@ -419,57 +487,38 @@
             </div>
         </div>
 
-        <!-- Tagged Transactions Report -->
         <div class="card-panel full-width">
             <div class="card-header">🏷️ Tagged Transactions Report (by priority)</div>
-            <div class="card-body">
+            <div class="card-body" id="taggedBody">
                 <div class="two-col" style="margin-bottom: 0;">
                     <div>
                         <div class="row-list"><span>🔴 <strong>Debt / Cash Advance (Urgent)</strong></span><span class="tag critical">~$150 in fees</span></div>
-                        <div style="padding-left: 16px; font-size: 0.75rem;">
-                            • Cashback Loans cycle: -$45 per cycle<br>
-                            • Interest charges: $21.71<br>
-                            • Late/Overdraft fees: $52
-                        </div>
+                        <div style="padding-left: 16px; font-size: 0.75rem;">• Cashback Loans cycle: -$45 per cycle<br>• Interest charges: $21.71<br>• Late/Overdraft fees: $52</div>
                         <div class="row-list" style="margin-top: 12px;"><span>🟠 <strong>Essential - Can Optimize</strong></span><span class="tag warning">$827/month</span></div>
-                        <div style="padding-left: 16px; font-size: 0.75rem;">
-                            • Auto Insurance: $155 (shop around)<br>
-                            • Auto Payment: $265 (fixed)<br>
-                            • Gas & Fuel: $252<br>
-                            • Loan payments: $380 (fixed)
-                        </div>
+                        <div style="padding-left: 16px; font-size: 0.75rem;">• Auto Insurance: $155 (shop around)<br>• Auto Payment: $265 (fixed)<br>• Gas & Fuel: $252<br>• Loan payments: $380 (fixed)</div>
                     </div>
                     <div>
                         <div class="row-list"><span>🟡 <strong>Discretionary - Easy to Cut</strong></span><span class="tag save">$767/month</span></div>
-                        <div style="padding-left: 16px; font-size: 0.75rem;">
-                            • Uber Eats/Food Delivery: $175 → cut 50% = save $87<br>
-                            • Restaurants & Dining: $407<br>
-                            • Shopping: $188 → delay non-essentials<br>
-                            • Alcohol/Bars: $160
-                        </div>
+                        <div style="padding-left: 16px; font-size: 0.75rem;">• Uber Eats/Food Delivery: $175 → cut 50% = save $87<br>• Restaurants & Dining: $407<br>• Shopping: $188 → delay non-essentials<br>• Alcohol/Bars: $160</div>
                         <div class="row-list" style="margin-top: 12px;"><span>🟢 <strong>Subscriptions - Review</strong></span><span class="tag essential">~$30/month</span></div>
-                        <div style="padding-left: 16px; font-size: 0.75rem;">
-                            • Peacock TV, Prime, CarePass, Apple — cancel unused
-                        </div>
+                        <div style="padding-left: 16px; font-size: 0.75rem;">• Peacock TV, Prime, CarePass, Apple — cancel unused</div>
                     </div>
                 </div>
-                <div class="insight-badge" style="margin-top: 12px;">🎯 <strong>Quick wins by tag:</strong> Debt tag → stop Cashback cycle ($45). Discretionary tag → cut delivery by half ($87). Subscriptions tag → cancel unused ($15). <strong>Total immediate savings: ~$147/month!</strong></div>
+                <div class="insight-badge" style="margin-top: 12px;">🎯 <strong>Quick wins:</strong> Debt → stop Cashback ($45). Discretionary → cut delivery by half ($87). Subscriptions → cancel unused ($15). <strong>Total immediate savings: ~$147/month!</strong></div>
             </div>
         </div>
 
-        <!-- Simple Action Plan -->
         <div class="card-panel full-width m-t">
             <div class="card-header">✅ Your Simple Action Plan (start today)</div>
             <div class="card-body">
                 <div class="row-list"><span>1️⃣ <strong>Break the Cashback Loans cycle</strong> — Save $200 from next paycheck as your emergency buffer.</span><span class="tag critical">save $45/month</span></div>
                 <div class="row-list"><span>2️⃣ <strong>Cut Uber Eats from 8x to 4x per month</strong> — Cook 4 more meals at home.</span><span class="tag save">save $75/month</span></div>
-                <div class="row-list"><span>4️⃣ <strong>Cancel unused subscriptions</strong> — Check your bank for recurring charges.</span><span class="tag save">save $15/month</span></div>
-                <div class="row-list"><span>5️⃣ <strong>Set low-balance alert at $100</strong> — Prevents overdraft and late fees.</span><span class="tag save">avoid $52+ fees</span></div>
+                <div class="row-list"><span>3️⃣ <strong>Cancel unused subscriptions</strong> — Check your bank for recurring charges.</span><span class="tag save">save $15/month</span></div>
+                <div class="row-list"><span>4️⃣ <strong>Set low-balance alert at $100</strong> — Prevents overdraft and late fees.</span><span class="tag save">avoid $52+ fees</span></div>
                 <div class="insight-badge">🌟 <strong>Total possible savings: ~$165/month</strong> — That turns your -$38 monthly cashflow into +$127 surplus. In 3 months, you can build a $500 emergency fund!</div>
             </div>
         </div>
 
-        <!-- Paycheck Timing & Forecast -->
         <div class="two-col m-t">
             <div class="card-panel">
                 <div class="card-header">📅 Paycheck Timing Insight</div>
@@ -477,7 +526,7 @@
                     <div class="row-list"><span>📆 Paydays</span><span>9th & 23rd (~$738 each)</span></div>
                     <div class="row-list"><span>⚠️ Problem</span><span>Large bills hit right after payday → low balance</span></div>
                     <div class="row-list"><span>💡 Solution</span><span>Schedule bills 2 days after payday + keep $75 buffer</span><span class="tag save">prevents overdraft</span></div>
-                    <div class="small-note">After payday, funds drain within 5-7 days due to Cashback Loans + loan installments. Staggering payments protects you.</div>
+                    <div class="small-note">After payday, funds drain within 5-7 days due to Cashback Loans + loan installments.</div>
                 </div>
             </div>
             <div class="card-panel">
@@ -487,12 +536,11 @@
                     <div class="flex-between"><span>🏦 Essential bills</span><span>~$1,024</span></div>
                     <div class="flex-between"><span>🍽️ If you spend like before</span><span class="amount-negative">-$128 deficit</span></div>
                     <div class="flex-between" style="margin-top: 10px;"><span>🌱 If you cut delivery + stop Cashback</span><span class="amount-positive">+$72 surplus</span><span class="tag success">sustainable!</span></div>
-                    <div class="insight-badge" style="margin-top: 12px;">✅ <strong>Goal:</strong> Move from negative to +$70/month. You can do this by changing just 2 habits.</div>
+                    <div class="insight-badge" style="margin-top: 12px;">✅ <strong>Goal:</strong> Move from negative to +$70/month by changing just 2 habits.</div>
                 </div>
             </div>
         </div>
 
-        <!-- Top Takeaways -->
         <div class="card-panel full-width" style="background: #f9fdfe;">
             <div class="card-header">🎯 Your 3 Most Important Takeaways</div>
             <div class="card-body">
@@ -501,7 +549,7 @@
                     <span class="tag critical">save $45/mo</span>
                 </div>
                 <div class="flex-between" style="background: #e6f7ed; padding: 12px; border-radius: 16px; margin-bottom: 10px;">
-                    <span>2️⃣ <strong>Cut Uber Eats by half</strong> — order 4x instead of 8x per month. Meal prep saves big.</span>
+                    <span>2️⃣ <strong>Cut Uber Eats by half</strong> — order 4x instead of 8x per month.</span>
                     <span class="tag save">save $75/mo</span>
                 </div>
                 <div class="flex-between" style="background: #e8f0fe; padding: 12px; border-radius: 16px;">
@@ -513,11 +561,52 @@
         </div>
     </div>
     <div class="footer-note">
-        📌 ROJA | Based on your actual bank transactions · All reports are designed to help you save money and stop expensive debt cycles.
+        📌 ROJA | Based on your actual bank transactions · Use the month and account selectors above to filter your data.
     </div>
 </div>
 
 <script>
+    // Month and Account Selector functionality
+    const monthSelector = document.getElementById('monthSelector');
+    const accountSelector = document.getElementById('accountSelector');
+    const dataRangeBadge = document.getElementById('dataRangeBadge');
+
+    function updateDashboard() {
+        const selectedMonth = monthSelector.value;
+        const selectedAccount = accountSelector.value;
+        
+        let displayText = '';
+        if (selectedMonth === 'all') {
+            displayText = 'Last 90 Days';
+        } else {
+            const monthNames = {
+                '2025-09': 'September 2025', '2025-08': 'August 2025', '2025-07': 'July 2025',
+                '2025-06': 'June 2025', '2025-05': 'May 2025', '2025-04': 'April 2025', '2025-03': 'March 2025'
+            };
+            displayText = monthNames[selectedMonth] || selectedMonth;
+        }
+        
+        if (selectedAccount !== 'all') {
+            const accountNames = { checking: 'Checking Account', savings: 'Savings Account', credit: 'Credit Card' };
+            displayText += ` · ${accountNames[selectedAccount]}`;
+        }
+        
+        if (dataRangeBadge) {
+            dataRangeBadge.textContent = `Showing: ${displayText}`;
+        }
+        
+        // For demo purposes, we keep the same data but show filter indicator
+        // In a production app, you would filter the actual data here
+        console.log(`Filtering by: Month=${selectedMonth}, Account=${selectedAccount}`);
+    }
+
+    monthSelector.addEventListener('change', updateDashboard);
+    accountSelector.addEventListener('change', updateDashboard);
+    
+    // Initialize
+    updateDashboard();
+
+    // Tab switching
     const tabMapping = {
         transactions: document.getElementById('tab-transactions'),
         categories: document.getElementById('tab-categories')
